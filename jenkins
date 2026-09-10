@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'M3'
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Yuvaraj93r5/ASS_006.git'
+            }
+        }
+
+        stage('Clean & Compile') {
+            steps {
+                bat 'mvn clean compile'
+            }
+        }
+
+        stage('Execute Comprehensive Tests') {
+            steps {
+                bat 'mvn test'
+            }
+        }
+
+        stage('Package Application') {
+            steps {
+                bat 'mvn package -DskipTests'
+            }
+        }
+    }
+
+    post {
+        always {
+            junit allowEmptyResults: true,
+                testResults: '**/target/surefire-reports/*.xml'
+        }
+
+        success {
+            echo 'CI/CD Pipeline finished successfully! The application is verified and built.'
+        }
+
+        failure {
+            echo 'Pipeline building failed. Please check the unit test failures or compilation errors above.'
+        }
+    }
+}
